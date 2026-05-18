@@ -804,8 +804,293 @@ header { padding: 48px 32px 16px; max-width: 1180px; margin: 0 auto; }
 
 ---
 
+## Shape 11 — Rich-Explainer
+
+**Use when** the content is conceptually rich and has multiple shapes inside it — process, comparison, timeline, decisions, code, design, anti-patterns — and would lose information if forced into prose-only explainer (Shape 1). The heavier cousin of explainer.
+
+**Philosophy**: teach by picking the best **section pattern** for each piece of information, drawn from the full palette of editorial treatments, embedded mini-versions of other shapes, and data visualizations. Every pattern earns its place by answering a question the prose just raised.
+
+### Layer 1 — When a section earns a pattern
+
+If the section contains a **comparison, quantity, process, decision, contrast, time-evolution, structural arrangement, code or data artifact, hands-on practice, or amplifiable insight** → it gets a pattern from Layer 2. If it is pure narrative reasoning or a one-line definition → leave it prose (use a margin sidenote for the definition).
+
+### Layer 2 — Information shape → section pattern
+
+| Information shape | What it answers | Section pattern |
+|---|---|---|
+| Options being compared | "Which is better for X?" | Mini-comparison cards (Shape 2) or feature matrix |
+| Process / sequence | "What are the steps?" | Inline SVG flow diagram or numbered stepper |
+| Time-based events (2-4) | "What happened when?" | Horizontal timeline |
+| Time-based events (5+) | "What happened when, with depth?" | Sticky-scroll timeline (right rail + IntersectionObserver) |
+| Quantity / scale | "How big, how many?" | Stat row, bold single number, or sparkline |
+| Decision branching | "Which path do I take?" | Decision tree mini or IF-THEN cards |
+| Definition / term | "What does X mean?" | Margin sidenote (`<aside>`) or hover-reveal `<dfn>` |
+| Before / after change | "How did it transform?" | Before/after panes or state diagram |
+| Wrong vs right | "What should I avoid?" | Anti-pattern grid |
+| Live / current state | "What is the status?" | Mini-dashboard, 2-3 KPI cards (Shape 10) |
+| Code / technical artifact | "What does this look like in code?" | Annotated code block with margin notes (Shape 9) |
+| Design / visual artifact | "What does this look like visually?" | Mini design reference — swatches or specimens (Shape 5) |
+| Hands-on practice | "Can I try this myself?" | Mini interactive editor (Shape 8) — light only |
+| Key insight / takeaway | "What is the big idea?" | Aha callout or pull quote |
+| Spatial / structural | "How is it laid out?" | Labeled schematic (inline SVG) |
+
+When a row says "(Shape N)", reuse that shape's CSS and HTML but **scope it down** — 2-3 items instead of 8. Visual consistency comes for free; you don't write new CSS.
+
+### Layer 3 — Layout, rhythm, interactivity
+
+- **One hero visual encouraged at top** — anchor visual for the whole page. Skip when the content has no single dominant concept.
+- **No more than 2 consecutive prose-only sections.** The third must carry a pattern, even a small one (callout, stat row, sidenote).
+- **Margin sidenotes (Tufte-style)** for parenthetical content — definitions, asides, citations, caveats. Right margin on desktop, collapses to main column on mobile.
+- **Light interactivity only.** `<details>` for deep-dives, `<dfn>` hover-reveal for terms. No clicks required to see main content.
+- **Topic eyebrows, not mode labels.** Keep section purpose implicit; don't tag sections with "How-to" / "Reference" / "Explanation" labels.
+
+### Skeleton
+
+```html
+<main class="rich-explainer">
+  <header>
+    <p class="eyebrow">Deep dive · 8 min read</p>
+    <h1>Hero headline</h1>
+    <p class="lead">One paragraph: why this exists and what it teaches.</p>
+  </header>
+
+  <!-- HERO (encouraged) — single anchor visual for the whole page -->
+  <figure class="hero">
+    <svg viewBox="0 0 800 320" role="img" aria-labelledby="hero-title">
+      <title id="hero-title">Concept anchor</title>
+      <!-- ... -->
+    </svg>
+  </figure>
+
+  <!-- Section with embedded flow diagram (process pattern) -->
+  <section>
+    <h2>How it works</h2>
+    <p>Prose that raises a question about the steps...</p>
+    <figure class="diagram"><!-- inline SVG --></figure>
+    <p>Prose that interprets the diagram.</p>
+  </section>
+
+  <!-- Section with mini-comparison (comparison pattern, scoped from Shape 2) -->
+  <section>
+    <h2>Two ways people get this wrong</h2>
+    <div class="mini-compare">
+      <article class="option"><!-- ... --></article>
+      <article class="option"><!-- ... --></article>
+    </div>
+  </section>
+
+  <!-- Section with margin sidenote + hover-reveal definition -->
+  <section class="with-aside">
+    <div class="main-col">
+      <h2>The principle</h2>
+      <p>Main argument with a term <dfn data-def="A surface that scrolls itself">like this</dfn> revealed on hover.</p>
+    </div>
+    <aside class="margin-note">
+      Optional aside: extra context, a citation, or a caveat. Right margin on desktop.
+    </aside>
+  </section>
+
+  <!-- Section with sticky-scroll timeline (USE ONLY for 5+ events) -->
+  <section class="timeline-scroll">
+    <div class="timeline-prose">
+      <article data-event="e1"><h3>1969</h3><p>...</p></article>
+      <article data-event="e2"><h3>1989</h3><p>...</p></article>
+      <!-- ...3 more events minimum -->
+    </div>
+    <div class="timeline-rail">
+      <svg viewBox="0 0 200 400">
+        <!-- vertical rail with N stops, each <g data-stop="eN"> -->
+      </svg>
+    </div>
+  </section>
+
+  <!-- Aha callout — high-contrast pull quote with the key insight -->
+  <aside class="aha">
+    <p class="aha-label">The key insight</p>
+    <p>The one sentence the reader should walk away with.</p>
+  </aside>
+</main>
+```
+
+### Shape-specific styles
+
+```css
+.rich-explainer { max-width: 1080px; margin: 0 auto; }
+
+/* HERO — single anchor visual for the whole page. */
+.rich-explainer .hero { margin: 32px 0 48px; }
+.rich-explainer .hero svg { width: 100%; height: auto; }
+
+/* MARGIN SIDENOTE LAYOUT — 1fr main column + 200px right margin column.
+   Collapses to single column with a top border on mobile so the
+   relationship to the paragraph above is preserved. */
+.with-aside {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 200px;
+  gap: 32px;
+  align-items: start;
+  margin: 32px 0;
+}
+.margin-note {
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--g500);
+  padding-left: 16px;
+  border-left: 1.5px solid var(--g300);
+  font-style: italic;
+}
+@media (max-width: 880px) {
+  .with-aside { grid-template-columns: 1fr; }
+  .margin-note {
+    margin-top: 16px;
+    border-left: none;
+    border-top: 1.5px solid var(--g300);
+    padding: 12px 0 0;
+  }
+}
+
+/* HOVER-REVEAL DEFINITIONS via <dfn data-def="..."> */
+dfn {
+  border-bottom: 1.5px dotted var(--clay);
+  font-style: normal;
+  cursor: help;
+  position: relative;
+}
+dfn:hover::after,
+dfn:focus::after {
+  content: attr(data-def);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  width: 240px;
+  padding: 8px 12px;
+  font-family: var(--sans);
+  font-size: 12px;
+  line-height: 1.5;
+  background: var(--slate);
+  color: var(--ivory);
+  border-radius: 6px;
+  z-index: 50;
+}
+
+/* AHA CALLOUT — high-contrast amplifier for the key insight.
+   Use at most 2-3 times per page. Save it for moments that matter. */
+.aha {
+  margin: 48px 0;
+  padding: 32px;
+  background: var(--slate);
+  color: var(--ivory);
+  border-radius: 12px;
+  text-align: center;
+}
+.aha-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--clay);
+  margin-bottom: 12px;
+}
+.aha p:not(.aha-label) {
+  font-family: var(--serif);
+  font-size: clamp(20px, 2.6vw, 28px);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* STICKY-SCROLL TIMELINE — prose scrolls in the left column,
+   rail stays sticky in the right column, the active stop on the
+   rail updates as each event scrolls into view (see Mandatory JS).
+   USE ONLY for 5+ events; degrade for prefers-reduced-motion. */
+.timeline-scroll {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 48px;
+  margin: 48px 0;
+}
+.timeline-prose > article {
+  min-height: 60vh;
+  padding: 24px 0;
+}
+.timeline-prose h3 {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--clay);
+  margin-bottom: 12px;
+}
+.timeline-rail {
+  position: sticky;
+  top: 80px;
+  align-self: start;
+  height: calc(100vh - 160px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.timeline-rail svg { width: 100%; height: 100%; }
+.timeline-rail [data-stop] { opacity: 0.35; transition: opacity 200ms ease; }
+.timeline-rail [data-stop].active { opacity: 1; }
+@media (max-width: 880px) {
+  .timeline-scroll { grid-template-columns: 1fr; }
+  .timeline-rail { position: static; height: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .timeline-rail { position: static; height: auto; }
+  .timeline-rail [data-stop] { opacity: 1; }
+}
+
+/* MINI-COMPARISON — scoped version of Shape 2's compare-grid.
+   2 cards instead of 3, no "recommended" highlight by default. */
+.mini-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 24px 0;
+}
+.mini-compare .option {
+  border: 1.5px solid var(--g300);
+  border-radius: 12px;
+  background: var(--paper);
+  padding: 18px;
+}
+@media (max-width: 720px) { .mini-compare { grid-template-columns: 1fr; } }
+```
+
+### Mandatory JS — sticky-scroll timeline (only when used)
+
+```html
+<script>
+  // Wire up the sticky-scroll timeline IF one exists on the page.
+  // As each event scrolls into the middle band of the viewport, the
+  // matching stop on the rail SVG gets the .active class (full opacity).
+  const events = document.querySelectorAll('.timeline-prose [data-event]');
+  if (events.length) {
+    const stops = document.querySelectorAll('.timeline-rail [data-stop]');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const id = entry.target.dataset.event;
+          stops.forEach((s) => s.classList.toggle('active', s.dataset.stop === id));
+        }
+      });
+    }, { rootMargin: '-40% 0px -40% 0px' });
+    events.forEach((e) => observer.observe(e));
+  }
+</script>
+```
+
+### Anti-patterns specific to this shape
+
+- **Decoration over information.** A pattern that doesn't answer a question the prose just raised is decoration. Delete it. The test: read the prose without the visual — is something genuinely missing? If no, the visual is bloat.
+- **Pattern-sampler page.** Mixing many different pattern types makes the page feel like a UI sampler, not a teaching artifact. Repetition is fine — three callouts, four sidenotes, two comparisons. Aim for a small set of treatments used purposefully.
+- **Sticky-scroll timeline for short timelines.** Sticky-scroll has implementation, mobile-occlusion, and accessibility (`prefers-reduced-motion`) costs. Use it ONLY for 5+ events where the rail genuinely updates as the user reads. For 2-4 events, a simple horizontal timeline is better.
+
+---
+
 ## When in doubt
 
 - The shape isn't obvious → default to **explainer**. Most content rendered as HTML is fundamentally "let me show you a thing."
+- The content is conceptually rich (process + comparison + timeline + decisions all in one piece) → use **rich-explainer** (Shape 11), not plain explainer. Plain explainer is for single-concept teaching; rich-explainer is the multi-shape variant.
 - The user said "make me a doc" with no shape hint → ask one clarifying question: "Is this for reading, presenting, or doing?" Their answer maps to explainer / slide deck / interactive editor.
 - The content fights two shapes → embed the secondary inside the primary. A weekly report (Shape 3) can contain an incident sub-section that uses Shape 6 inline SVG. Don't split into two files.

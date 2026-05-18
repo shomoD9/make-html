@@ -58,6 +58,7 @@ The shape is the single biggest decision. It determines layout, navigation, and 
 | **interactive editor** | The user needs to do something and export the result | "let me drag", "let me tweak", "give me an editor", "I'll re-order" |
 | **code review** | An annotated diff with margin notes | "review this diff", "annotate this PR" |
 | **dashboard** | At-a-glance KPIs, small charts, status pills | "dashboard", "KPIs", "at a glance" |
+| **rich-explainer** | A concept deep-dive whose content has multiple shapes inside it (process + comparison + timeline + decisions + code + design) and would lose information if forced into prose-only explainer. Embeds mini-versions of other shapes as section patterns. | "rich explainer", "visual explainer", "fully visual", "make this visual", "show me don't just tell me" |
 
 Full templates and rules for each live in [shapes.md](shapes.md). **Read shapes.md before writing the file** — it has paste-ready scaffolding for every shape above.
 
